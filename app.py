@@ -2,6 +2,7 @@ from flask import Flask, request, render_template
 from utils.file import find_random_index_html, get_opening_name, opening_line_to_filename, sanitize_wiki_filename, read_file_lines, resolve_opening_name
 from utils.chess import filename_to_uci_line, update_board, update_full_move_list
 from footer import get_footer
+import os
 import json
 
 app = Flask(__name__)
@@ -60,7 +61,24 @@ def chessopeningtheory_page():
     
     # Get the list of legal moves
     legal_moves = json.dumps([str(move) for move in board.legal_moves])
-    print(legal_moves)
+    
+    wiki_moves = []
+    for move in board.legal_moves:
+        san = str(board.san(move))
+        wiki_dir = '/home/jimmyrustles/mysite/chessopeningtheory_formatted/'
+        wiki_path = opening_line_to_filename(san_move_list).replace("\\","/").replace("/index.html","").replace("index.html","")
+        halfmove_num = wiki_path.count("/")
+        movenum = int(((wiki_path.count("/") - 1) / 2) + 2)
+        dotstring = '._'
+        if halfmove_num % 2 == 0:
+            dotstring = '...'
+        if wiki_path == '':
+            movenum = 1
+            dotstring = '._'
+        wiki_filename = wiki_dir + wiki_path + "/" + str(movenum) + dotstring + san
+        full_wiki_filename = wiki_filename + '/index.html'
+        if os.path.exists(full_wiki_filename):
+            wiki_moves.append(str(move))
     
     # Render the template with the necessary variables
     outtext = render_template(
@@ -76,7 +94,8 @@ def chessopeningtheory_page():
         new_move_list=new_move_list, 
         san_move_list=san_move_list, 
         get_footer=get_footer,
-        legal_moves=legal_moves
+        legal_moves=legal_moves,
+        wiki_moves=wiki_moves
     )
 
     return outtext

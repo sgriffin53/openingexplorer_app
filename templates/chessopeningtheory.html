@@ -70,6 +70,7 @@
             }
 
             function highlightWikiMoves() {
+                wiki_moves = {{ wiki_moves | tojson }};
                 for (var i = 0; i < wiki_moves.length; i++) {
                     greenSquare(wiki_moves[i][2] + wiki_moves[i][3]);
                     greySquare(wiki_moves[i][0] + wiki_moves[i][1]);
@@ -78,6 +79,7 @@
 
             function onMouseoverSquare(square, piece) {
                 legal_moves = {{ legal_moves | tojson }};
+                wiki_moves = {{ wiki_moves | tojson }};
                 for (var i = 0; i < legal_moves.length; i++) {
                     if (legal_moves[i][0] == square[0] && legal_moves[i][1] == square[1]) {
                         greySquare(legal_moves[i][2] + legal_moves[i][3]);
