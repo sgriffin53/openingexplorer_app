@@ -4,6 +4,11 @@ from utils.chess import filename_to_uci_line, update_board, update_full_move_lis
 from footer import get_footer
 import os
 import json
+import logging
+
+
+logging.basicConfig(level=logging.DEBUG) 
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -46,8 +51,6 @@ def chessopeningtheory_page():
 
     # Update the board and move lists based on the current move list
     board, new_move_list, san_move_list = update_board(move_list)
-    print('board')
-    print(board)
     new_full_move_list = update_full_move_list(full_move_list)
 
     # Get the board position in FEN notation
@@ -68,6 +71,9 @@ def chessopeningtheory_page():
     
     # Get the list of legal moves
     legal_moves = json.dumps([str(move) for move in board.legal_moves])
+    
+    # Debugging - Somehow pieces move anywhere, capture any piece
+    logger.debug(f'legal moves: {legal_moves}')
     
     wiki_moves = []
     for move in board.legal_moves:

@@ -1,159 +1,191 @@
+<!-- ./templates/chessopeningtheory.html -->
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ opening_name }} - Chess Openings Explorer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chessboard-1.0.0.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"
         integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2"
         crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='js/chessboard-1.0.0.min.js') }}"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <center><h1>Chess Opening Explorer</h1>
-    A chess opening explorer tool and study guide. Play a chess opening on the board and see the related article and stats for that opening.<br><br>
-    <div class="container">
-        <div class="left-div">
-            <div class="left-div-header">
+    <header>
+        <h1>Chess Opening Explorer</h1>
+        <p>A chess opening explorer tool and study guide. Play a chess opening on the board and see the related article and stats for that opening.</p>
+    </header>
+    
+    <main class="container">
+        <section class="board-controls">
+            <header>
                 <h2>{{ opening_name }}</h2>
+            </header>
+            <div id="myBoard" onmouseleave="mouseoutBoard()"></div>
+            <div class="controls">
+                <button onclick="backToStart()"><<</button>
+                <button onclick="backOne()"><</button>
+                <button onclick="forwardOne()">></button>
+                <button onclick="forwardAll()">>></button>
             </div>
-            <div class="board-div" id="myBoard" onmouseleave="mouseoutBoard()"></div>
-            <input type="button" style="width:100px" onclick="backToStart()" value="<<">
-            <input type="button" style="width:100px" onclick="backOne()" value="<">
-            <input type="button" style="width:100px" onclick="forwardOne()" value=">">
-            <input type="button" style="width:100px" onclick="forwardAll()" value=">>"><br>
-            <input type="checkbox" name="highlight_wiki_check" onclick="clickHWcheckbox()" id="highlight_wiki_check" {% if highlight_wiki_moves_flag == 'true' %} checked {% endif %}><label for="highlight_wiki_check">Highlight Wiki Moves</label><br>
-            <input type="checkbox" name="flip_board_check" onclick="clickFBcheckbox()" id="flip_board_check" {% if flipped_flag == 'true' %} checked {% endif %}><label for="flip_board_check">Flip Board (Black's perspective)</label><br>
-            <a href="/chessopeningtheory?random=random">Random Page</a><br>
-            <a href="/chessopeningtheory">Restart</a><br><br>
-        </div>
-        <div class="right-div" id="wiki_text">
+            <div class="options">
+                <label>
+                    <input type="checkbox" id="highlight_wiki_check" {% if highlight_wiki_moves_flag == 'true' %} checked {% endif %} onclick="clickHWcheckbox()">
+                    Highlight Wiki Moves
+                </label>
+                <label>
+                    <input type="checkbox" id="flip_board_check" {% if flipped_flag == 'true' %} checked {% endif %} onclick="clickFBcheckbox()">
+                    Flip Board (Black's perspective)
+                </label>
+            </div>
+            <div class="links">
+                <a href="/chessopeningtheory?random=random">Random Page</a><br>
+                <a href="/chessopeningtheory">Restart</a>
+            </div>
+        </section>
+        
+        <aside id="wiki_text">
             {{ lines|safe }}
-        </div>
-    </div>
+        </aside>
+    </main>
+    
     <form action="/chessopeningtheory" id="my_form" method="GET">
         <input type="hidden" name="flipped" id="flipped" value="{{ flipped_flag }}">
         <input type="hidden" name="highlight_wiki_moves" id="highlight_wiki_moves" value="{{ highlight_wiki_moves_flag }}">
         <input type="hidden" id="move_list" name="move_list" value="{{ move_list }}">
         <input type="hidden" id="full_move_list" name="full_move_list" value="{{ full_move_list }}">
-        <input type="submit" id="submit_button" hidden="hidden">
+        <input type="submit" id="submit_button" hidden>
     </form>
 
-    <!-- Move the script tags to the bottom of the body -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var whiteSquareGrey = '#a9a9a9';
-            var blackSquareGrey = '#696969';
-            var whiteSquareGreen = '#00d900';
-            var blackSquareGreen = '#009900';
-
-            function removeGreySquares() {
+        document.addEventListener('DOMContentLoaded', () => {
+            const whiteSquareGrey = '#a9a9a9';
+            const blackSquareGrey = '#696969';
+            const whiteSquareGreen = '#00d900';
+            const blackSquareGreen = '#009900';
+    
+            const removeGreySquares = () => {
                 $('#myBoard .square-55d63').css('background', '');
-            }
-
-            function greySquare(square) {
-                var $square = $('#myBoard .square-' + square);
-                var background = whiteSquareGrey;
-                if ($square.hasClass('black-3c85d')) {
-                    background = blackSquareGrey;
-                }
+            };
+    
+            const greySquare = (square) => {
+                const $square = $(`#myBoard .square-${square}`);
+                const background = $square.hasClass('black-3c85d') ? blackSquareGrey : whiteSquareGrey;
                 $square.css('background', background);
-            }
-
-            function greenSquare(square) {
-                var $square = $('#myBoard .square-' + square);
-                var background = whiteSquareGreen;
-                if ($square.hasClass('black-3c85d')) {
-                    background = blackSquareGreen;
-                }
+            };
+    
+            const greenSquare = (square) => {
+                const $square = $(`#myBoard .square-${square}`);
+                const background = $square.hasClass('black-3c85d') ? blackSquareGreen : whiteSquareGreen;
                 $square.css('background', background);
-            }
-
-            function highlightWikiMoves() {
-                wiki_moves = {{ wiki_moves | tojson }};
-                for (var i = 0; i < wiki_moves.length; i++) {
-                    greenSquare(wiki_moves[i][2] + wiki_moves[i][3]);
-                    greySquare(wiki_moves[i][0] + wiki_moves[i][1]);
+            };
+    
+            const highlightWikiMoves = () => {
+                const wikiMoves = {{ wiki_moves | tojson }};
+                if (Array.isArray(wikiMoves)) {
+                    wikiMoves.forEach(([startX, startY, endX, endY]) => {
+                        greenSquare(`${endX}${endY}`);
+                        greySquare(`${startX}${startY}`);
+                    });
                 }
-            }
-
-            function onMouseoverSquare(square, piece) {
-                legal_moves = {{ legal_moves | tojson }};
-                wiki_moves = {{ wiki_moves | tojson }};
-                for (var i = 0; i < legal_moves.length; i++) {
-                    if (legal_moves[i][0] == square[0] && legal_moves[i][1] == square[1]) {
-                        greySquare(legal_moves[i][2] + legal_moves[i][3]);
-                        greySquare(square);
+            };
+    
+            const onMouseoverSquare = (square, piece) => {
+                const legalMoves = {{ legal_moves | tojson }};
+                const wikiMoves = {{ wiki_moves | tojson }};
+    
+                if (Array.isArray(legalMoves)) {
+                    legalMoves.forEach(([startX, startY, endX, endY]) => {
+                        if (startX === square[0] && startY === square[1]) {
+                            greySquare(`${endX}${endY}`);
+                            greySquare(square);
+                        }
+                    });
+                }
+    
+                if (Array.isArray(wikiMoves)) {
+                    let wikiMove = false;
+                    wikiMoves.forEach(([startX, startY, endX, endY]) => {
+                        if (startX === square[0] && startY === square[1]) {
+                            greenSquare(`${endX}${endY}`);
+                        }
+                        if (`${startX}${startY}` === square) wikiMove = true;
+                    });
+    
+                    if (!wikiMove && document.getElementById("highlight_wiki_check").checked) {
+                        highlightWikiMoves();
                     }
                 }
-                for (var i = 0; i < wiki_moves.length; i++) {
-                    if (wiki_moves[i][0] == square[0] && wiki_moves[i][1] == square[1]) {
-                        greenSquare(wiki_moves[i][2] + wiki_moves[i][3]);
-                    }
-                }
-                wiki_move = false;
-                for (var i = 0; i < wiki_moves.length; i++) {
-                    if (wiki_moves[i][0] + wiki_moves[i][1] == square) wiki_move = true;
-                }
-                if (wiki_move == false && document.getElementById("highlight_wiki_check").checked.toString() == 'true') highlightWikiMoves();
-            }
-
-            function onMouseoutSquare(square, piece) {
+            };
+    
+            const onMouseoutSquare = () => {
                 removeGreySquares();
-            }
-
-            function mouseoutBoard() {
-                if (document.getElementById("highlight_wiki_check").checked.toString() == 'true') highlightWikiMoves();
-            }
-
-            function backToStart() {
+            };
+    
+            const mouseoutBoard = () => {
+                if (document.getElementById("highlight_wiki_check").checked) {
+                    highlightWikiMoves();
+                }
+            };
+    
+            const backToStart = () => {
                 document.getElementById("move_list").value = '';
                 document.getElementById("my_form").submit();
-            }
-
-            function backOne() {
+            };
+    
+            const backOne = () => {
                 document.getElementById("move_list").value = '{{ new_move_list }}';
                 document.getElementById("my_form").submit();
-            }
-
-            function clickFBcheckbox() {
-                document.getElementById("flipped").value = document.getElementById("flip_board_check").checked.toString();
+            };
+    
+            const clickFBcheckbox = () => {
+                document.getElementById("flipped").value = document.getElementById("flip_board_check").checked;
                 document.getElementById("my_form").submit();
-            }
-
-            function clickHWcheckbox() {
-                document.getElementById("highlight_wiki_moves").value = document.getElementById("highlight_wiki_check").checked.toString();
+            };
+    
+            const clickHWcheckbox = () => {
+                document.getElementById("highlight_wiki_moves").value = document.getElementById("highlight_wiki_check").checked;
                 document.getElementById("my_form").submit();
-            }
-
-            function forwardOne() {
+            };
+    
+            const forwardOne = () => {
                 document.getElementById("move_list").value = '{{ new_move_list_forward }}';
                 document.getElementById("my_form").submit();
-            }
-
-            function forwardAll() {
+            };
+    
+            const forwardAll = () => {
                 document.getElementById("move_list").value = '{{ full_move_list }}';
                 document.getElementById("my_form").submit();
-            }
-
-            function onDrop(source, target, piece, newPos, oldPos, orientation) {
-                if (document.getElementById("move_list").value != "") document.getElementById("move_list").value += "_";
-                document.getElementById("move_list").value += source + target;
-                if (document.getElementById("full_move_list").value != "") document.getElementById("full_move_list").value += "_";
-                document.getElementById("full_move_list").value += source + target;
+            };
+    
+            const onDrop = (source, target, piece, newPos, oldPos, orientation) => {
+                let moveList = document.getElementById("move_list").value;
+                moveList += moveList ? `_${source}${target}` : `${source}${target}`;
+                document.getElementById("move_list").value = moveList;
+    
+                let fullMoveList = document.getElementById("full_move_list").value;
+                fullMoveList += fullMoveList ? `_${source}${target}` : `${source}${target}`;
+                document.getElementById("full_move_list").value = fullMoveList;
+    
                 document.getElementById("my_form").submit();
-            }
-
-            var config = {
+            };
+    
+            const config = {
                 draggable: true,
                 position: '{{ position }}',
-                onDrop: onDrop,
-                onMouseoverSquare: onMouseoverSquare,
-                onMouseoutSquare: onMouseoutSquare,
-                orientation: '{{ 'white' if flipped_flag == 'false' else 'black' }}'
+                onDrop,
+                onMouseoverSquare,
+                onMouseoutSquare,
+                orientation: '{{ "white" if flipped_flag == "false" else "black" }}'
             };
-            board = Chessboard('myBoard', config);
-            if (document.getElementById("highlight_wiki_check").checked.toString() == 'true') highlightWikiMoves();
+    
+            const board = Chessboard('myBoard', config);
+            if (document.getElementById("highlight_wiki_check").checked) {
+                highlightWikiMoves();
+            }
         });
     </script>
     <script src="{{ url_for('static', filename='js/chess.js') }}"></script>

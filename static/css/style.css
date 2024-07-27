@@ -1,0 +1,29 @@
+/* ./static/css/style.css */
+
+.container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.left-div, .right-div {
+    flex: 1;
+    padding: 10px;
+}
+
+.left-div {
+    max-width: 60%;
+}
+
+.right-div {
+    max-width: 35%;
+    overflow-y: auto;
+}
+
+.board-div {
+    width: 100%;
+    height: 400px; /* Adjust as needed */
+}
+
+.controls, .options, .links {
+    margin-top: 10px;
+}
