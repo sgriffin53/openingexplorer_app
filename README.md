@@ -12,4 +12,4 @@ Chess opening explorer in flask
     * `pip install -r requirements.txt`
 3. Launch application:
     * `python -m app`
-4. Visit the UI in a browser at `http://127.0.0.1:5000`.
+4. Visit the UI in a browser at `http://127.0.0.1:5000/chessopeningtheory`.
