@@ -1,0 +1,32 @@
+/* chessboard-1.0.0.min.css */
+.chessboard-55d63 {
+    width: 100%;
+    height: 100%;
+}
+
+.square-55d63 {
+    width: 12.5%;
+    height: 12.5%;
+    float: left;
+    position: relative;
+    padding-bottom: 12.5%;
+    background-color: #f0d9b5;
+}
+
+.square-55d63.black-3c85d {
+    background-color: #b58863;
+}
+
+.square-55d63.highlight1-32417 {
+    background-color: #9f9;
+}
+
+.square-55d63.highlight2-9c5d2 {
+    background-color: #d2a;
+}
+
+.piece-417db {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
