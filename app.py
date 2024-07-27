@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect, url_for
 from utils.file import find_random_index_html, get_opening_name, opening_line_to_filename, sanitize_wiki_filename, read_file_lines, resolve_opening_name
 from utils.chess import filename_to_uci_line, update_board, update_full_move_list
 from footer import get_footer
@@ -6,6 +6,13 @@ import os
 import json
 
 app = Flask(__name__)
+
+
+@app.before_request
+def redirect_img_requests():
+    if request.path.startswith('/img'):
+        new_path = request.path.replace('/img', '/static/img', 1)
+        return redirect(new_path)
 
 @app.route('/chessopeningtheory')
 def chessopeningtheory_page():
